@@ -12,7 +12,13 @@ class Booking extends Model
         'seat_number',
         'party_date',
         'party_number',
-        'price'
+        'price',
+        'extras'
+    ];
+
+    protected $casts = [
+        'extras' => 'array',
+        'party_date' => 'date',
     ];
 
     public function movie() {

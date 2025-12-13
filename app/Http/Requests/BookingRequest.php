@@ -28,6 +28,10 @@ class BookingRequest extends FormRequest
             "movie_id" => ["integer", "gt:0", 'required'],
             "party_date" => ["date", 'required'],
             "party_number" => ["string", 'required'],
+            "extras" => ["array", "nullable"],
+            "extras.*.name" => ["string", "required_with:extras"],
+            "extras.*.price" => ["numeric", "min:0", "required_with:extras"],
+            "extras.*.quantity" => ["integer", "min:0", "required_with:extras"],
         ];
     }
 }

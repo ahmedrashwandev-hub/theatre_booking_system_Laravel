@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\MovieController;
 use App\Http\Controllers\Api\ValueController;
 use App\Http\Controllers\Api\AuthController;
 
-//Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bookings', [BookingController::class, 'index']);
     Route::get('/bookings/{id}', [BookingController::class, 'show']);
     Route::post('/bookings', [BookingController::class, 'store']);
@@ -14,7 +14,7 @@ use App\Http\Controllers\Api\AuthController;
     Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
     Route::get('/booked_seats/{party_date}/{movie_id}', [BookingController::class, 'booked_seats']);
     Route::get('/movies/{id}', [MovieController::class, 'show']);
-//});
+});
 
 //Route::middleware('admin')->group(function () {
     // Admin

@@ -36,7 +36,7 @@ class MovieController extends Controller
     {
         try {
             $posterPath = null;
-            
+
             if ($request->hasFile('poster')) {
                 $posterPath = $request->file('poster')->store('posters', 'public');
             }
@@ -81,18 +81,23 @@ class MovieController extends Controller
      */
     public function update(MovieRequest $request, string $id)
     {
-        if ($request->hasFile('poster')) {
-            $posterPath = $request->file('poster')->store('posters', 'public');
+        $movie = Movie::find($id);
+
+        if (!$movie) {
+            return response()->json(['message' => 'Movie not found'], 404);
         }
 
-        // Create movie
-        $movie = Movie::find($id);
+        // If there's a new poster file, store it and update the path; otherwise keep existing
+        if ($request->hasFile('poster')) {
+            $posterPath = $request->file('poster')->store('posters', 'public');
+            $movie->poster = $posterPath;
+        }
+
         $movie->title = $request->title;
         $movie->description = $request->description;
-        $movie->poster = $posterPath;
         $movie->TypeOfFilm = $request->TypeOfFilm;
         $movie->duration = $request->duration;
-        
+
         $movie->save();
 
         // Response
