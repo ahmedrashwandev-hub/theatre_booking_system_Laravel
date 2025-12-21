@@ -16,19 +16,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/movies/{id}', [MovieController::class, 'show']);
 });
 
-//Route::middleware('admin')->group(function () {
-    // Admin
+// Public routes
+Route::get('/movies', [MovieController::class, 'index']);
+
+// Admin-only routes (require authentication and admin role)
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    // Settings
     Route::get('/settings', [ValueController::class, 'index']);
     Route::get('/settings/{id}', [ValueController::class, 'show']);
     Route::post('/settings', [ValueController::class, 'update']);
     Route::delete('/settings/{id}', [ValueController::class, 'destroy']);
 
+    // Movie management (admin only)
     Route::post('/movies', [MovieController::class, 'store']);
     Route::put('/movies/{id}', [MovieController::class, 'update']);
+    Route::patch('/movies/{id}', [MovieController::class, 'update']); // Alternative for FormData
     Route::delete('/movies/{id}', [MovieController::class, 'destroy']);
-//});
-
-Route::get('/movies', [MovieController::class, 'index']);
+});
 
 // Auth
 Route::post('/register', [AuthController::class, 'register']);

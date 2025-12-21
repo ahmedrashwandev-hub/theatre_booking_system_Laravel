@@ -18,22 +18,30 @@ class AdminMiddleware
     public function handle(Request $request, Closure $next)
     {
         // 1. التحقق أن المستخدم مسجل دخول
-        // 'auth' middleware يقوم بالتحقق من هذا، لكن هذه خطوة إضافية للوضوح
         if (!Auth::check()) {
-            // إذا لم يكن مسجلاً، وجهه لصفحة تسجيل الدخول
+            // For API requests, return JSON response
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Unauthenticated. Please login first.'
+                ], 401);
+            }
+            // For web requests, redirect to login
             return redirect('/login'); 
         }
 
         // 2. التحقق أن المستخدم أدمن (is_admin = true)
-        // نفترض أن الـ Model الخاص بك هو App\Models\User إذا كنت تستخدم Laravel 8 أو أحدث.
-        if (Auth::user()->is_admin) {
-            // إذا كان أدمن، اسمح بالمرور
-            return $next($request);
+        if (!Auth::user()->is_admin) {
+            // For API requests, return JSON response
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Unauthorized. Admin access required.'
+                ], 403);
+            }
+            // For web requests, redirect with error
+            return redirect('/')->with('error', 'ليس لديك صلاحية الوصول لهذه الصفحة.');
         }
 
-        // 3. إذا كان مسجلاً دخول لكن ليس أدمن، وجهه لصفحة ما
-        // يمكنك توجيهه لصفحة 403 (ممنوع) أو الصفحة الرئيسية.
-        return redirect('/')->with('error', 'ليس لديك صلاحية الوصول لهذه الصفحة.');
-        // أو يمكنك استخدام abort(403);
+        // 3. إذا كان أدمن، اسمح بالمرور
+        return $next($request);
     }
 }
