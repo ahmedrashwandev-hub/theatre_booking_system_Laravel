@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Movie;
 use App\Http\Requests\MovieRequest;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class MovieController extends Controller
 {
@@ -37,7 +39,8 @@ class MovieController extends Controller
     {
         try {
             // Authorization check - only admins can create
-            if (!auth()->check() || !auth()->user()->is_admin) {
+            $user = Auth::user();
+            if (!$user || !$user->is_admin) {
                 return response()->json([
                     'message' => 'Unauthorized. Admin access required.'
                 ], 403);
@@ -86,10 +89,10 @@ class MovieController extends Controller
                     'Access-Control-Allow-Origin' => '*',
                 ]);
             }
-            
+
             // Ensure all fields are included in response
             $movieData = $movie->toArray();
-            
+
             return response()->json($movieData, 200, [
                 'Content-Type' => 'application/json',
                 'Access-Control-Allow-Origin' => '*',
@@ -115,7 +118,8 @@ class MovieController extends Controller
     {
         try {
             // Authorization check - only admins can update
-            if (!auth()->check() || !auth()->user()->is_admin) {
+            $user = Auth::user();
+            if (!$user || !$user->is_admin) {
                 return response()->json([
                     'message' => 'Unauthorized. Admin access required.'
                 ], 403);
@@ -128,7 +132,7 @@ class MovieController extends Controller
             }
 
             // Debug: Log what we received
-            \Log::info('Update movie request received', [
+            Log::info('Update movie request received', [
                 'id' => $id,
                 'title' => $request->input('title'),
                 'description' => $request->input('description'),
@@ -162,7 +166,7 @@ class MovieController extends Controller
                 'movie' => $movie
             ], 200);
         } catch (\Exception $e) {
-            \Log::error('Error updating movie', [
+            Log::error('Error updating movie', [
                 'id' => $id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -181,7 +185,8 @@ class MovieController extends Controller
     {
         try {
             // Authorization check - only admins can delete
-            if (!auth()->check() || !auth()->user()->is_admin) {
+            $user = Auth::user();
+            if (!$user || !$user->is_admin) {
                 return response()->json([
                     'message' => 'Unauthorized. Admin access required.'
                 ], 403);
@@ -194,8 +199,8 @@ class MovieController extends Controller
             }
 
             // Delete poster file if exists
-            if ($movie->poster && \Storage::disk('public')->exists($movie->poster)) {
-                \Storage::disk('public')->delete($movie->poster);
+            if ($movie->poster && Storage::disk('public')->exists($movie->poster)) {
+                Storage::disk('public')->delete($movie->poster);
             }
 
             $movie->delete();
